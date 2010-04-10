@@ -1,0 +1,1 @@
+Multiple attempts at creating a minimal Java EE solution using TDD. Each attempt is in a separate branch.
