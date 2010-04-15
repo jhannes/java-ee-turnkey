@@ -11,4 +11,19 @@ public class PersonTest {
 		assertThat(Person.withName("Johannes").getName()).isEqualTo("Johannes");
 	}
 
+	@Test
+	public void shouldBaseEqualsOnName() throws Exception {
+		assertThat(Person.withName("Johannes"))
+			.isEqualTo(Person.withName("Johannes"))
+			.isNotEqualTo(Person.withName("Something else"))
+			.isNotEqualTo(new Object())
+			.isNotEqualTo(Person.withName(null))
+			.isNotEqualTo(null)
+			;
+
+		assertThat(Person.withName(null))
+			.isEqualTo(Person.withName(null))
+			.isNotEqualTo(Person.withName("Johannes"));
+
+	}
 }

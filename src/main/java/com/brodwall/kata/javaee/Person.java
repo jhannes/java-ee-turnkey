@@ -15,4 +15,19 @@ public class Person {
 		return name;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Person)) return false;
+		Person person = (Person)obj;
+		return nullSafeEquals(name, person.name);
+	}
+
+	private<T> boolean nullSafeEquals(T a, T b) {
+		return a != null ? a.equals(b) : b == null;
+	}
+
+	@Override
+	public String toString() {
+		return "Person<" + name + ">";
+	}
 }
