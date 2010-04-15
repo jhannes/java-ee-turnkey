@@ -15,6 +15,18 @@ public class PersonServlet extends HttpServlet {
 	private PersonDao personDao;
 
 	@Override
+	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		personDao.beginTransaction();
+		boolean commit = false;
+		try {
+			super.service(req, resp);
+			commit = true;
+		} finally {
+			personDao.endTransaction(commit);
+		}
+	}
+
+	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setContentType("text/html");
 
@@ -41,6 +53,11 @@ public class PersonServlet extends HttpServlet {
 		} else {
 			showCreateForm(resp.getWriter(), fullName, errorMessage);
 		}
+	}
+
+	@Override
+	public void init() throws ServletException {
+		setPersonDao(new HibernatePersonDao("jdbc/personDs"));
 	}
 
 	private String validateName(String fullName) {
