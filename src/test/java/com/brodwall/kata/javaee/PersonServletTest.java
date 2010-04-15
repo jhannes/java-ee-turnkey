@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,10 +25,12 @@ public class PersonServletTest {
 	private HttpServletRequest req = mock(HttpServletRequest.class);
 	private HttpServletResponse resp = mock(HttpServletResponse.class);
 	private StringWriter pageSource = new StringWriter();
+	private PersonDao personDao = mock(PersonDao.class);
 
 	@Before
 	public void setupServlet() throws IOException {
 		when(resp.getWriter()).thenReturn(new PrintWriter(pageSource));
+		personServlet.setPersonDao(personDao);
 	}
 
 	@Test
@@ -50,9 +54,6 @@ public class PersonServletTest {
 
 	@Test
 	public void shouldCreatePerson() throws Exception {
-		PersonDao personDao = mock(PersonDao.class);
-		personServlet.setPersonDao(personDao);
-
 		httpRequest("POST", "/create.html");
 		when(req.getParameter("full_name")).thenReturn("Johannes Brodwall");
 
@@ -75,5 +76,26 @@ public class PersonServletTest {
 			.contains("<input type='submit' name='find' value='Search'");
 		DocumentHelper.parseText(pageSource.toString());
 	}
+
+	@Test
+	public void shouldSearchForPeople() throws Exception {
+		httpRequest("GET", "/find.html");
+		when(req.getParameter("name_query")).thenReturn("brodw");
+
+		List<Person> people = Arrays.asList(Person.withName("Foo"), Person.withName("Bar"));
+		when(personDao.findPeople(anyString())).thenReturn(people);
+
+		personServlet.service(req, resp);
+
+		verify(resp).setContentType("text/html");
+		verify(personDao).findPeople("brodw");
+		assertThat(pageSource.toString())
+			.contains("<form method='get' action='find.html'")
+			.contains("<input type='text' name='name_query' value='brodw'")
+			.contains("<li>Foo</li>")
+			.contains("<li>Bar</li>");
+		DocumentHelper.parseText(pageSource.toString());
+	}
+
 
 }

@@ -1,6 +1,8 @@
 package com.brodwall.kata.javaee;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -16,16 +18,29 @@ public class PersonServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setContentType("text/html");
 
+		PrintWriter writer = resp.getWriter();
 		if (req.getPathInfo().equals("/create.html")) {
-			resp.getWriter().println("<form method='post' action='create.html'>");
-			resp.getWriter().println("<input type='text' name='full_name' value=''/>");
-			resp.getWriter().println("<input type='submit' name='create' value='Create person'/>");
-			resp.getWriter().println("</form>");
+			writer.println("<form method='post' action='create.html'>");
+			writer.println("<input type='text' name='full_name' value=''/>");
+			writer.println("<input type='submit' name='create' value='Create person'/>");
+			writer.println("</form>");
 		} else {
-			resp.getWriter().println("<form method='get' action='find.html'>");
-			resp.getWriter().println("<input type='text' name='name_query' value=''/>");
-			resp.getWriter().println("<input type='submit' name='find' value='Search'/>");
-			resp.getWriter().println("</form>");
+			String nameQuery = req.getParameter("name_query");
+			List<Person> people = personDao.findPeople(nameQuery);
+			if (nameQuery == null) nameQuery = "";
+
+			writer.println("<html>");
+			writer.println("<form method='get' action='find.html'>");
+			writer.println("<input type='text' name='name_query' value='" + nameQuery + "'/>");
+			writer.println("<input type='submit' name='find' value='Search'/>");
+			writer.println("</form>");
+
+			writer.println("<ul>");
+			for (Person person : people) {
+				writer.println("<li>" + person.getName() + "</li>");
+			}
+			writer.println("</ul>");
+			writer.println("</html>");
 		}
 	}
 
