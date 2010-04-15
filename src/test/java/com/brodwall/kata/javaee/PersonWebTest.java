@@ -18,7 +18,7 @@ public class PersonWebTest {
 	@Test
 	public void shouldFindCreatedPeople() throws Exception {
 		jdbcDataSource dataSource = new jdbcDataSource();
-		dataSource.setDatabase("jdbc:hsqldb:mem:personDaoTest");
+		dataSource.setDatabase("jdbc:hsqldb:mem:personWebTest");
 		dataSource.setUser("sa");
 		new EnvEntry("jdbc/personDs", dataSource);
 
