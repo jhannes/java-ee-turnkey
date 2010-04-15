@@ -16,10 +16,17 @@ public class PersonServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setContentType("text/html");
 
-		resp.getWriter().println("<form method='post' action='create.html'>");
-		resp.getWriter().println("<input type='text' name='full_name' value=''/>");
-		resp.getWriter().println("<input type='submit' name='create' value='Create person'/>");
-		resp.getWriter().println("</form>");
+		if (req.getPathInfo().equals("/create.html")) {
+			resp.getWriter().println("<form method='post' action='create.html'>");
+			resp.getWriter().println("<input type='text' name='full_name' value=''/>");
+			resp.getWriter().println("<input type='submit' name='create' value='Create person'/>");
+			resp.getWriter().println("</form>");
+		} else {
+			resp.getWriter().println("<form method='get' action='find.html'>");
+			resp.getWriter().println("<input type='text' name='name_query' value=''/>");
+			resp.getWriter().println("<input type='submit' name='find' value='Search'/>");
+			resp.getWriter().println("</form>");
+		}
 	}
 
 	@Override
