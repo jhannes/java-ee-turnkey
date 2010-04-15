@@ -21,6 +21,17 @@ public class PersonDaoTest {
 		assertThat(personDao.findPeople(null)).contains(person);
 	}
 
+	@Test
+	public void shouldFindPeopleByNameSubstring() throws Exception {
+		Person person = Person.withName("Johannes Brodwall");
+		Person notFoundPerson = Person.withName("Something Else");
+		personDao.createPerson(person);
+		personDao.createPerson(notFoundPerson);
+		assertThat(personDao.findPeople("brodw"))
+			.contains(person)
+			.excludes(notFoundPerson);
+	}
+
 	@Before
 	public void createPersonDao() throws NamingException {
 		jdbcDataSource dataSource = new jdbcDataSource();
