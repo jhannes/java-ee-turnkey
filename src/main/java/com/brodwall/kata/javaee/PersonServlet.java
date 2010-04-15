@@ -33,15 +33,20 @@ public class PersonServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String fullName = req.getParameter("full_name");
-		if (fullName.equals("")) {
-			showCreateForm(resp.getWriter(), "", "Name must be provided");
-			return;
-		} else if (fullName.length() > 30) {
-			showCreateForm(resp.getWriter(), fullName, "Name cannot be longer than 30 characters");
-			return;
+		String errorMessage = validateName(fullName);
+
+		if (errorMessage == null) {
+			personDao.createPerson(Person.withName(fullName));
+			resp.sendRedirect("/");
+		} else {
+			showCreateForm(resp.getWriter(), fullName, errorMessage);
 		}
-		personDao.createPerson(Person.withName(fullName));
-		resp.sendRedirect("/");
+	}
+
+	private String validateName(String fullName) {
+		if (fullName.equals("")) return "Name must be provided";
+		if (fullName.length() > 30) return "Name cannot be longer than 30 characters";
+		return null;
 	}
 
 	private void showCreateForm(PrintWriter writer, String fullName, String errorMessage) {
