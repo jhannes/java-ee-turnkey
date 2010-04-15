@@ -20,28 +20,44 @@ public class PersonServlet extends HttpServlet {
 
 		PrintWriter writer = resp.getWriter();
 		if (req.getPathInfo().equals("/create.html")) {
-			writer.println("<form method='post' action='create.html'>");
-			writer.println("<input type='text' name='full_name' value=''/>");
-			writer.println("<input type='submit' name='create' value='Create person'/>");
-			writer.println("</form>");
+			showCreateForm(writer);
 		} else {
 			String nameQuery = req.getParameter("name_query");
 			List<Person> people = personDao.findPeople(nameQuery);
 			if (nameQuery == null) nameQuery = "";
 
-			writer.println("<html>");
-			writer.println("<form method='get' action='find.html'>");
-			writer.println("<input type='text' name='name_query' value='" + nameQuery + "'/>");
-			writer.println("<input type='submit' name='find' value='Search'/>");
-			writer.println("</form>");
-
-			writer.println("<ul>");
-			for (Person person : people) {
-				writer.println("<li>" + person.getName() + "</li>");
-			}
-			writer.println("</ul>");
-			writer.println("</html>");
+			showSearchPage(writer, nameQuery, people);
 		}
+	}
+
+	private void showCreateForm(PrintWriter writer) {
+		writer.println("<form method='post' action='create.html'>");
+		writer.println("<input type='text' name='full_name' value=''/>");
+		writer.println("<input type='submit' name='create' value='Create person'/>");
+		writer.println("</form>");
+	}
+
+	private void showSearchPage(PrintWriter writer, String nameQuery,
+			List<Person> people) {
+		writer.println("<html>");
+		showSearchForm(writer, nameQuery);
+		showSearchResults(writer, people);
+		writer.println("</html>");
+	}
+
+	private void showSearchForm(PrintWriter writer, String nameQuery) {
+		writer.println("<form method='get' action='find.html'>");
+		writer.println("<input type='text' name='name_query' value='" + nameQuery + "'/>");
+		writer.println("<input type='submit' name='find' value='Search'/>");
+		writer.println("</form>");
+	}
+
+	private void showSearchResults(PrintWriter writer, List<Person> people) {
+		writer.println("<ul>");
+		for (Person person : people) {
+			writer.println("<li>" + person.getName() + "</li>");
+		}
+		writer.println("</ul>");
 	}
 
 	@Override
