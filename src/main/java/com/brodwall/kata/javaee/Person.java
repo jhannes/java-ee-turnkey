@@ -30,4 +30,9 @@ public class Person {
 	public String toString() {
 		return "Person<" + name + ">";
 	}
+
+	@Override
+	public int hashCode() {
+		return name != null ? name.hashCode() : -1;
+	}
 }

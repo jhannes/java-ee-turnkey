@@ -18,12 +18,18 @@ public class PersonTest {
 			.isNotEqualTo(Person.withName("Something else"))
 			.isNotEqualTo(new Object())
 			.isNotEqualTo(Person.withName(null))
-			.isNotEqualTo(null)
-			;
+			.isNotEqualTo(null);
 
 		assertThat(Person.withName(null))
 			.isEqualTo(Person.withName(null))
 			.isNotEqualTo(Person.withName("Johannes"));
+	}
 
+	@Test
+	public void shouldBaseHashCodeOnName() throws Exception {
+		assertThat(Person.withName("Johannes").hashCode()).as("hashCode")
+			.isEqualTo(Person.withName("Johannes").hashCode())
+			.isNotEqualTo(Person.withName("Something else").hashCode())
+			.isNotEqualTo(Person.withName(null).hashCode());
 	}
 }
