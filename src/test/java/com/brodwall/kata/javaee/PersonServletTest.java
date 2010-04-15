@@ -82,20 +82,38 @@ public class PersonServletTest {
 		httpRequest("GET", "/find.html");
 		when(req.getParameter("name_query")).thenReturn("brodw");
 
+		personServlet.service(req, resp);
+
+		verify(personDao).findPeople("brodw");
+	}
+
+	@Test
+	public void shouldDisplaySearchResults() throws Exception {
+		httpRequest("GET", "/find.html");
+
 		List<Person> people = Arrays.asList(Person.withName("Foo"), Person.withName("Bar"));
 		when(personDao.findPeople(anyString())).thenReturn(people);
 
 		personServlet.service(req, resp);
 
 		verify(resp).setContentType("text/html");
-		verify(personDao).findPeople("brodw");
 		assertThat(pageSource.toString())
-			.contains("<form method='get' action='find.html'")
-			.contains("<input type='text' name='name_query' value='brodw'")
 			.contains("<li>Foo</li>")
 			.contains("<li>Bar</li>");
 		DocumentHelper.parseText(pageSource.toString());
 	}
 
+	@Test
+	public void shouldEchoSearchTerm() throws Exception {
+		httpRequest("GET", "/find.html");
+		when(req.getParameter("name_query")).thenReturn("brodw");
+
+		personServlet.service(req, resp);
+
+		verify(resp).setContentType("text/html");
+		assertThat(pageSource.toString())
+			.contains("<form method='get' action='find.html'")
+			.contains("<input type='text' name='name_query' value='brodw'");
+	}
 
 }
