@@ -20,7 +20,7 @@ public class PersonServlet extends HttpServlet {
 
 		PrintWriter writer = resp.getWriter();
 		if (req.getPathInfo().equals("/create.html")) {
-			showCreateForm(writer);
+			showCreateForm(writer, "", null);
 		} else {
 			String nameQuery = req.getParameter("name_query");
 			List<Person> people = personDao.findPeople(nameQuery);
@@ -30,11 +30,30 @@ public class PersonServlet extends HttpServlet {
 		}
 	}
 
-	private void showCreateForm(PrintWriter writer) {
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String fullName = req.getParameter("full_name");
+		if (fullName.equals("")) {
+			showCreateForm(resp.getWriter(), "", "Name must be provided");
+			return;
+		} else if (fullName.length() > 30) {
+			showCreateForm(resp.getWriter(), fullName, "Name cannot be longer than 30 characters");
+			return;
+		}
+		personDao.createPerson(Person.withName(fullName));
+		resp.sendRedirect("/");
+	}
+
+	private void showCreateForm(PrintWriter writer, String fullName, String errorMessage) {
+		writer.println("<html>");
+		if (errorMessage != null) {
+			writer.println("<div id='errorMessage'>" + errorMessage + "</div>");
+		}
 		writer.println("<form method='post' action='create.html'>");
-		writer.println("<input type='text' name='full_name' value=''/>");
+		writer.println("<input type='text' name='full_name' value='" + fullName + "'/>");
 		writer.println("<input type='submit' name='create' value='Create person'/>");
 		writer.println("</form>");
+		writer.println("</html>");
 	}
 
 	private void showSearchPage(PrintWriter writer, String nameQuery,
@@ -58,12 +77,6 @@ public class PersonServlet extends HttpServlet {
 			writer.println("<li>" + person.getName() + "</li>");
 		}
 		writer.println("</ul>");
-	}
-
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		personDao.createPerson(Person.withName(req.getParameter("full_name")));
-		resp.sendRedirect("/");
 	}
 
 	public void setPersonDao(PersonDao personDao) {
