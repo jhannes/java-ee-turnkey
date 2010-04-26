@@ -9,7 +9,7 @@ public class WebServer {
 
 	public static void main(String[] args) throws Exception {
 		jdbcDataSource dataSource = new jdbcDataSource();
-		dataSource.setDatabase("jdbc:hsqldb:file:target/personDatabase");
+		dataSource.setDatabase("jdbc:hsqldb:file:src/test/db/personDatabase");
 		dataSource.setUser("sa");
 		new EnvEntry("jdbc/personDs", dataSource);
 
