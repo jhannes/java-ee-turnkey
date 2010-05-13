@@ -1,4 +1,4 @@
-package com.brodwall.kata.javaee;
+package no.steria.kata.javaee;
 
 import static org.fest.assertions.Assertions.assertThat;
 

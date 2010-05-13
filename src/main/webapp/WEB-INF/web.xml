@@ -5,7 +5,7 @@
 
 	<servlet>
 		<servlet-name>personServlet</servlet-name>
-		<servlet-class>com.brodwall.kata.javaee.PersonServlet</servlet-class>
+		<servlet-class>no.steria.kata.javaee.PersonServlet</servlet-class>
 	</servlet>
 	
 	<servlet-mapping>

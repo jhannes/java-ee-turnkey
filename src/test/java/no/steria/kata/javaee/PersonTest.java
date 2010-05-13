@@ -1,6 +1,8 @@
-package com.brodwall.kata.javaee;
+package no.steria.kata.javaee;
 
 import static org.fest.assertions.Assertions.assertThat;
+
+import no.steria.kata.javaee.Person;
 
 import org.junit.Test;
 

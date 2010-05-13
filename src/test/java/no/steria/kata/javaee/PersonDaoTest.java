@@ -1,8 +1,12 @@
-package com.brodwall.kata.javaee;
+package no.steria.kata.javaee;
 
 import static org.fest.assertions.Assertions.assertThat;
 
 import javax.naming.NamingException;
+
+import no.steria.kata.javaee.HibernatePersonDao;
+import no.steria.kata.javaee.Person;
+import no.steria.kata.javaee.PersonDao;
 
 import org.hsqldb.jdbc.jdbcDataSource;
 import org.junit.After;

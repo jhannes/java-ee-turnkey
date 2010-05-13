@@ -1,4 +1,4 @@
-package com.brodwall.kata.javaee;
+package no.steria.kata.javaee;
 
 import org.hsqldb.jdbc.jdbcDataSource;
 import org.mortbay.jetty.Server;
