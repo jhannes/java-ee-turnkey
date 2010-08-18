@@ -1,6 +1,8 @@
 package no.steria.kata.javaee;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,16 +28,55 @@ public class PersonServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/html");
 
-        resp.getWriter().append("<form method='post' action='create.html'>")//
-                .append("<input type='text' name='full_name' value='' />")//
-                .append("<input type='submit' name='create' value='Create the person' />")//
-                .append("</form>");
+        PrintWriter writer = resp.getWriter();
+        writer.append("<html>");
+        if ("/find.html".equals(req.getPathInfo())) {
+            String nameQuery = req.getParameter("name_query");
+
+            showFindView(writer, nameQuery, personDao.findPeople(nameQuery));
+
+        } else {
+            showCreateView(writer);
+        }
+        writer.append("</html>");
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         personDao.createPerson(Person.withName(req.getParameter("full_name")));
         resp.sendRedirect("/");
+    }
+
+    private void showFindView(PrintWriter writer, String nameQuery, List<Person> people) {
+        showFindForm(writer, nameQuery);
+        showFindResult(writer, people);
+    }
+
+    private void showFindResult(PrintWriter writer, List<Person> people) {
+        writer.append("<ul>");
+        for (Person person : people) {
+            writer.append("<li>").append(person.getName()).append("</li>");
+        }
+        writer.append("</ul>");
+    }
+
+    private void showFindForm(PrintWriter writer, String nameQuery) {
+        writer.append("<form method='get' action='find.html'>")//
+                .append("<input type='text' name='name_query' value='" + (nameQuery != null ? nameQuery : "") + "' />")//
+                .append("<input type='submit' name='find' value='Search for person' />")//
+                .append("</form>");
+    }
+
+    private void showCreateView(PrintWriter writer) {
+        writer.append("<form method='post' action='create.html'>")//
+                .append("<input type='text' name='full_name' value='' />")//
+                .append("<input type='submit' name='create' value='Create the person' />")//
+                .append("</form>");
+    }
+
+    @Override
+    public void init() throws ServletException {
+        setPersonDao(new HibernatePersonDao("jdbc/personDs"));
     }
 
     public void setPersonDao(PersonDao personDao) {

@@ -1,13 +1,16 @@
 package no.steria.kata.javaee;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,12 +26,11 @@ public class PersonServletTest {
     private HttpServletRequest req = mock(HttpServletRequest.class);
     private HttpServletResponse resp = mock(HttpServletResponse.class);
     private PersonDao personDao = mock(PersonDao.class);
+    private StringWriter html = new StringWriter();
 
     @Test
     public void shouldShowCreateForm() throws Exception {
         when(req.getMethod()).thenReturn("GET");
-        StringWriter html = new StringWriter();
-        when(resp.getWriter()).thenReturn(new PrintWriter(html));
 
         servlet.service(req , resp);
 
@@ -55,9 +57,65 @@ public class PersonServletTest {
 
         verify(resp).sendRedirect("/");
     }
+    @Test
+    public void shouldShowSearchForm() throws Exception {
+        httpRequest("GET", "/find.html");
+
+        servlet.service(req, resp);
+
+        assertThat(html.toString()).contains("<form method='get' action='find.html'");
+        assertThat(html.toString()).contains("<input type='text' name='name_query' value=''");
+        assertThat(html.toString()).contains("<input type='submit' name='find' value='Search for person'");
+
+        DocumentHelper.parseText(html.toString());
+    }
+
+    @Test
+    public void shouldSearchForPeople() throws Exception {
+        httpRequest("GET", "/find.html");
+        when(req.getParameter("name_query")).thenReturn("hvasomhelst");
+
+        servlet.service(req, resp);
+
+        verify(personDao).findPeople("hvasomhelst");
+    }
+
+    @Test
+    public void shouldDisplaySearchResults() throws Exception {
+        httpRequest("GET", "/find.html");
+
+        when(personDao.findPeople(anyString())).thenReturn(Arrays.asList(Person.withName("foo"), Person.withName("Bar")));
+
+        servlet.service(req, resp);
+
+        assertThat(html.toString())
+            .contains("<ul>")
+            .contains("<li>foo</li>")
+            .contains("<li>Bar</li>")
+            .contains("</ul>");
+    }
+
+    @Test
+    public void shouldEchoSearchQuery() throws Exception {
+        httpRequest("GET", "/find.html");
+        when(req.getParameter("name_query")).thenReturn("hvasomhelst");
+
+        servlet.service(req, resp);
+
+        assertThat(html.toString())//
+            .contains("<form")//
+            .contains("value='hvasomhelst'");
+
+    }
+
+    private void httpRequest(String method, String pathInfo) {
+        when(req.getMethod()).thenReturn(method);
+        when(req.getPathInfo()).thenReturn(pathInfo);
+    }
 
     @Before
-    public void setupServlet() {
+    public void setupServlet() throws IOException {
+        when(resp.getWriter()).thenReturn(new PrintWriter(html));
         servlet.setPersonDao(personDao);
     }
 }
