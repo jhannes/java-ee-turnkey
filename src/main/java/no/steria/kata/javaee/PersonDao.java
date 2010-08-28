@@ -1,5 +1,7 @@
 package no.steria.kata.javaee;
 
+import java.util.List;
+
 
 public interface PersonDao {
 
@@ -8,5 +10,7 @@ public interface PersonDao {
 	void beginTransaction();
 
 	void endTransaction(boolean commit);
+
+	List<Person> findPeople(String nameQuery);
 
 }

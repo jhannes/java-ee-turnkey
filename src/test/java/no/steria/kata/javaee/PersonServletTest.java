@@ -2,6 +2,7 @@ package no.steria.kata.javaee;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -97,6 +99,33 @@ public class PersonServletTest {
 			.contains("<input type='text' name='full_name' value='&lt;'");
 	}
 	
+	@Test
+	public void shouldDisplaySearchPage() throws Exception {
+		getRequest("/findPeople.html");
+		servlet.service(req, resp);
+		
+		verify(resp).setContentType("text/html");
+		assertThat(htmlSource.toString())
+			.contains("<form action='findPeople.html' method='get'")
+			.contains("<input type='text' name='name_query' value=''")
+			.contains("<input type='submit' name='findPeople' value='Search'");		
+	}
+	
+	@Test
+	public void shouldSearchForPeople() throws Exception {
+		getRequest("/findPeople.html");
+		when(req.getParameter("name_query")).thenReturn("Vader");
+		when(personDao.findPeople(anyString())).thenReturn(Arrays.asList(Person.withName("Anakin Skywalker")));
+		servlet.service(req, resp);
+		
+		verify(personDao).findPeople("Vader");
+		
+		assertThat(htmlSource.toString())
+			.contains("<ul>")
+			.contains("<li>Anakin Skywalker</li>")
+			.contains("name='name_query' value='Vader'");
+	}
+
 	private void getRequest(String action) {
 		when(req.getMethod()).thenReturn("GET");
 		when(req.getPathInfo()).thenReturn(action);

@@ -1,6 +1,14 @@
 package no.steria.kata.javaee;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+@Entity
 public class Person {
+	@SuppressWarnings("unused")
+	@Id @GeneratedValue
+	private Long id;
 
 	private String name;
 
