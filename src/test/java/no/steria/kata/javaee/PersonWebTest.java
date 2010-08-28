@@ -2,9 +2,12 @@ package no.steria.kata.javaee;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import org.hibernate.cfg.Environment;
+import org.hsqldb.jdbc.jdbcDataSource;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.plus.naming.EnvEntry;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -17,8 +20,13 @@ public class PersonWebTest {
 	private String baseUrl;
 
 	@Test
-	@Ignore("Too big steps for now")
 	public void shouldDisplaySavedPeople() throws Exception {
+		System.setProperty(Environment.HBM2DDL_AUTO, "create");
+		jdbcDataSource dataSource = new jdbcDataSource();
+		dataSource.setDatabase("jdbc:hsqldb:mem:testingWeb");
+		dataSource.setUser("sa");
+		new EnvEntry("jdbc/personDs", dataSource);
+		
 		Server server = new Server(0);
 		server.addHandler(new WebAppContext("src/main/webapp","/"));
 		server.start();

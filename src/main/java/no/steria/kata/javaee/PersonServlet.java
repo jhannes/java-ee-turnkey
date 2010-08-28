@@ -111,4 +111,9 @@ public class PersonServlet extends HttpServlet {
 		this.personDao = personDao;
 	}
 	
+	@Override
+	public void init() throws ServletException {
+		personDao = new HibernatePersonDao("jdbc/personDs");
+	}
+	
 }
