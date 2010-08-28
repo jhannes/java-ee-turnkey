@@ -5,7 +5,6 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import org.hibernate.cfg.Environment;
 import org.hsqldb.jdbc.jdbcDataSource;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.plus.naming.EnvEntry;

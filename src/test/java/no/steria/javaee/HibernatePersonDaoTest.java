@@ -16,20 +16,32 @@ public class HibernatePersonDaoTest {
 	private static final boolean COMMIT = true;
 	private PersonDao personDao;
 
-
-
 	@Test
 	public void shouldFindSavedPeople() throws Exception {
 		Person luke = Person.withName("Luke Skywalker");
 		personDao.beginTransaction();
 		personDao.createPerson(luke);
+		assertThat(personDao.findPeople(null)).contains(luke);
+		personDao.endTransaction(COMMIT);		
+	}
+
+	@Test
+	public void shouldCommitOrRollback() throws Exception {
+		Person luke = Person.withName("Luke Skywalker");
+		personDao.beginTransaction();
+		personDao.createPerson(luke);
 		personDao.endTransaction(COMMIT);
 		
+		Person jarjar = Person.withName("Jar Jar Binks");
 		personDao.beginTransaction();
+		personDao.createPerson(jarjar);
+		// Jar Jar was a REALLY BAD IDEA, lets roll back
 		personDao.endTransaction(ROLLBACK);
 		
 		personDao.beginTransaction();
-		assertThat(personDao.findPeople(null)).contains(luke);
+		assertThat(personDao.findPeople(null))
+			.contains(luke)
+			.excludes(jarjar);
 		personDao.endTransaction(COMMIT);		
 	}
 	
@@ -47,19 +59,6 @@ public class HibernatePersonDaoTest {
 		
 		assertThat(personDao.findPeople("sky")).containsExactly(luke,annie);
 	}
-	
-	@Test
-	public void shouldRollBack() throws Exception {
-		Person jarjar = Person.withName("Jar Jar Binks");
-		personDao.beginTransaction();
-		personDao.createPerson(jarjar);
-		personDao.endTransaction(ROLLBACK);
-		
-		personDao.beginTransaction();
-		assertThat(personDao.findPeople(null)).excludes(jarjar);
-		personDao.endTransaction(COMMIT);		
-	}
-	
 
 	
 	@Before

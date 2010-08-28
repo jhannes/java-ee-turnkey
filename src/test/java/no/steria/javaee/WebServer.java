@@ -1,7 +1,5 @@
 package no.steria.javaee;
 
-import javax.naming.NamingException;
-
 import org.hibernate.cfg.Environment;
 import org.hsqldb.jdbc.jdbcDataSource;
 import org.mortbay.jetty.Server;
