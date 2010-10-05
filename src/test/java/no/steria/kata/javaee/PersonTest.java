@@ -7,32 +7,34 @@ import org.junit.Test;
 public class PersonTest {
 
     @Test
-    public void shouldGetName() throws Exception {
-        assertThat(Person.withName("Darth").getName()).isEqualTo("Darth");
+    public void shouldGetNames() throws Exception {
+        assertThat(Person.withName("Darth", "Vader").getName()).isEqualTo("Darth Vader");
+        assertThat(Person.withName("Darth", "Vader").getFirstName()).isEqualTo("Darth");
+        assertThat(Person.withName("Darth", "Vader").getLastName()).isEqualTo("Vader");
     }
 
     @Test
     public void shouldBeEqualWhenNameIsEqual() throws Exception {
-        assertThat(Person.withName("Darth")) //
-            .isEqualTo(Person.withName("Darth")) //
-            .isNotEqualTo(Person.withName("Anakin")) //
-            .isNotEqualTo(Person.withName(null)) //
+        assertThat(Person.withName("Darth", "Vader")) //
+            .isEqualTo(Person.withName("Darth", "Vader")) //
+            .isNotEqualTo(Person.withName("Anakin", "Skywalker")) //
+            .isNotEqualTo(Person.withName(null, null)) //
             .isNotEqualTo(new Object()) //
             .isNotEqualTo(null) //
         ;
 
-        assertThat(Person.withName(null)) //
-            .isEqualTo(Person.withName(null))
-            .isNotEqualTo(Person.withName("Darth")) //
+        assertThat(Person.withName(null, null)) //
+            .isEqualTo(Person.withName(null, null))
+            .isNotEqualTo(Person.withName("Darth", null)) //
         ;
     }
 
     @Test
     public void shouldBaseHashcodeOnName() throws Exception {
-        assertThat(Person.withName("Darth").hashCode()).as("hashCode") //
-            .isEqualTo(Person.withName("Darth").hashCode()) //
-            .isNotEqualTo(Person.withName("Anakin").hashCode()) //
-            .isNotEqualTo(Person.withName(null).hashCode())
+        assertThat(Person.withName("Darth", "Vader").hashCode()).as("hashCode") //
+            .isEqualTo(Person.withName("Darth", "Vader").hashCode()) //
+            .isNotEqualTo(Person.withName("Anakin", "Skywalker").hashCode()) //
+            .isNotEqualTo(Person.withName(null, null).hashCode())
             ;
     }
 

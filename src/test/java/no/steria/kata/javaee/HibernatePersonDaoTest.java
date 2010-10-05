@@ -17,7 +17,7 @@ public class HibernatePersonDaoTest {
     @Test
     public void shouldFindCreatedPeople() throws Exception {
         personDao.beginTransaction();
-        Person person = Person.withName("Darth");
+        Person person = Person.withName("Darth", "Vader");
         personDao.createPerson(person);
         assertThat(personDao.findPeople(null)).contains(person);
     }
@@ -25,11 +25,14 @@ public class HibernatePersonDaoTest {
     @Test
     public void shouldLimitFindToQuery() throws Exception {
         personDao.beginTransaction();
-        Person matchingPerson = Person.withName("Darth Vader");
-        Person nonMatchingPerson = Person.withName("Anakin");
+        Person matchingPerson = Person.withName("Darth", "Vader");
+        Person nonMatchingPerson = Person.withName("Anakin", "Skywalker");
         personDao.createPerson(matchingPerson); personDao.createPerson(nonMatchingPerson);
 
         assertThat(personDao.findPeople("vader")) //
+            .contains(matchingPerson) //
+            .excludes(nonMatchingPerson);
+        assertThat(personDao.findPeople("darth")) //
             .contains(matchingPerson) //
             .excludes(nonMatchingPerson);
     }
@@ -37,12 +40,12 @@ public class HibernatePersonDaoTest {
     @Test
     public void shouldCommitOrRollback() throws Exception {
         personDao.beginTransaction();
-        Person commitedPerson = Person.withName("Darth");
+        Person commitedPerson = Person.withName("Darth", "Vader");
         personDao.createPerson(commitedPerson);
         personDao.endTransaction(true);
 
         personDao.beginTransaction();
-        Person uncommitedPerson = Person.withName("Jar Jar Binks");
+        Person uncommitedPerson = Person.withName("Jar Jar", "Binks");
         personDao.createPerson(uncommitedPerson);
         personDao.endTransaction(false);
 

@@ -11,22 +11,26 @@ public class Person {
     @Id @GeneratedValue
     private Long id;
 
-    private String name;
+    private String firstName;
 
-    public static Person withName(String name) {
+    private String lastName;
+
+
+    public static Person withName(String firstName, String lastName) {
         Person person = new Person();
-        person.name = name;
+        person.firstName = firstName;
+        person.lastName = lastName;
         return person;
     }
 
     public String getName() {
-        return name;
+        return firstName + " " + lastName;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Person)) return false;
-        return nullSafeEquals(name, ((Person)obj).name);
+        return nullSafeEquals(getName(), ((Person)obj).getName());
     }
 
     @Override
@@ -43,4 +47,11 @@ public class Person {
         return "Person<" + getName() + ">";
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
 }

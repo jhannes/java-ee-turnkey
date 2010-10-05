@@ -41,7 +41,8 @@ public class PersonServletTest {
 
         assertThat(htmlSource.toString()) //
             .contains("<form method='post' action='createPerson.html'") //
-            .contains("<input type='text' name='full_name' value=''") //
+            .contains("<input type='text' name='first_name' value=''") //
+            .contains("<input type='text' name='last_name' value=''") //
             .contains("<input type='submit' name='createPerson' value='Create person'") //
         ;
     }
@@ -49,55 +50,74 @@ public class PersonServletTest {
     @Test
     public void shouldCreatePerson() throws Exception {
         when(req.getMethod()).thenReturn("POST");
-        when(req.getParameter("full_name")).thenReturn("Darth");
+        when(req.getParameter("first_name")).thenReturn("Darth");
+        when(req.getParameter("last_name")).thenReturn("Vader");
         servlet.service(req, resp);
 
         InOrder order = inOrder(personDao);
         order.verify(personDao).beginTransaction();
-        order.verify(personDao).createPerson(Person.withName("Darth"));
+        order.verify(personDao).createPerson(Person.withName("Darth", "Vader"));
         order.verify(personDao).endTransaction(true);
     }
 
     @Test
-    public void shouldValidateNameIsGiven() throws Exception {
+    public void shouldValidateFirstNameIsGiven() throws Exception {
         when(req.getMethod()).thenReturn("POST");
-        when(req.getParameter("full_name")).thenReturn("");
+        when(req.getParameter("first_name")).thenReturn("");
+        when(req.getParameter("last_name")).thenReturn("Vader");
 
         servlet.service(req, resp);
         verify(personDao, never()).createPerson(any(Person.class));
 
         assertThat(htmlSource.toString()) //
             .contains("<form ") //
-            .contains("<div id='error'>Name must be given</div>")
+            .contains("<div class='error'>First name must be given</div>")
+            ;
+    }
+
+    @Test
+    public void shouldValidateLastNameIsGiven() throws Exception {
+        when(req.getMethod()).thenReturn("POST");
+        when(req.getParameter("first_name")).thenReturn("Darth");
+        when(req.getParameter("last_name")).thenReturn("");
+
+        servlet.service(req, resp);
+        verify(personDao, never()).createPerson(any(Person.class));
+
+        assertThat(htmlSource.toString()) //
+            .contains("<form ") //
+            .contains("<div class='error'>Last name must be given</div>")
             ;
     }
 
     @Test
     public void shouldValidateNameCannotContainHtmlCharacters() throws Exception {
         when(req.getMethod()).thenReturn("POST");
-        when(req.getParameter("full_name")).thenReturn("<&>");
+        when(req.getParameter("first_name")).thenReturn("<&");
+        when(req.getParameter("last_name")).thenReturn(">");
 
         servlet.service(req, resp);
         verify(personDao, never()).createPerson(any(Person.class));
 
         assertThat(htmlSource.toString()) //
             .contains("<form ") //
-            .contains("name='full_name' value='&lt;&amp;&gt;'") //
-            .contains("<div id='error'>Name contains illegal characters</div>")
+            .contains("name='first_name' value='&lt;&amp;'") //
+            .contains("name='last_name' value='&gt;'") //
+            .contains("<div class='error'>First name contains illegal characters</div>")
+            .contains("<div class='error'>Last name contains illegal characters</div>")
             ;
     }
 
     @Test
     public void shouldRollbackOnError() throws Exception {
-        when(req.getMethod()).thenReturn("POST");
-        when(req.getParameter("full_name")).thenReturn("Darth");
-        RuntimeException thrown = new RuntimeException();
+        getRequest("/findPeople.html");
+        IllegalAccessError thrown = new IllegalAccessError();
         doThrow(thrown)
-            .when(personDao).createPerson(any(Person.class));
+            .when(personDao).findPeople(anyString());
 
         try {
             servlet.service(req, resp);
-        } catch (RuntimeException caught) {
+        } catch (IllegalAccessError caught) {
             assertThat(caught).isEqualTo(thrown);
         }
 
@@ -129,7 +149,7 @@ public class PersonServletTest {
 
     @Test
     public void shouldDisplaySearchResult() throws Exception {
-        List<Person> people = Arrays.asList(Person.withName("Darth Vader"), Person.withName("Luke Skywalker"));
+        List<Person> people = Arrays.asList(Person.withName("Darth", "Vader"), Person.withName("Luke", "Skywalker"));
         when(personDao.findPeople(anyString())).thenReturn(people);
         getRequest("/findPeople.html");
 

@@ -37,7 +37,8 @@ public class PersonWebTest {
         WebDriver browser = createWebDriver();
         browser.get(baseUrl);
         browser.findElement(By.linkText("Create person")).click();
-        browser.findElement(By.name("full_name")).sendKeys("Darth Vader");
+        browser.findElement(By.name("first_name")).sendKeys("Darth");
+        browser.findElement(By.name("last_name")).sendKeys("Vader");
         browser.findElement(By.name("createPerson")).click();
 
         browser.get(baseUrl);

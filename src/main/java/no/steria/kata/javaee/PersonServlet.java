@@ -35,50 +35,59 @@ public class PersonServlet extends HttpServlet {
             List<Person> people = personDao.findPeople(nameQuery);
             showSearchPage(writer, nameQuery, people);
         } else {
-            showCreatePage(writer, "", null);
+            showCreatePage(writer, "", null, "", null);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String fullName = req.getParameter("full_name");
-        String errorMessage = validateName(fullName);
+        String firstName = req.getParameter("first_name");
+        String lastName = req.getParameter("last_name");
+        String firstNameErrorMessage = validateName(firstName);
+        String lastNameErrorMessage = validateName(lastName);
 
-        if (errorMessage == null) {
-            personDao.createPerson(Person.withName(fullName));
-            resp.sendRedirect("/");
-        } else {
+        if (firstNameErrorMessage != null || lastNameErrorMessage != null) {
             resp.setContentType("text/html");
-            showCreatePage(resp.getWriter(), fullName, errorMessage);
+            showCreatePage(resp.getWriter(), firstName, firstNameErrorMessage, lastName, lastNameErrorMessage);
+        } else {
+            personDao.createPerson(Person.withName(firstName, lastName));
+            resp.sendRedirect("/");
         }
     }
 
     private String validateName(String fullName) {
         String errorMessage = null;
-        if (fullName.equals("")) {
-            errorMessage = "Name must be given";
+        if (fullName == null || fullName.equals("")) {
+            errorMessage = "must be given";
         } else if (containsIllegalCharacters(fullName)) {
-            errorMessage = "Name contains illegal characters";
+            errorMessage = "contains illegal characters";
         }
         return errorMessage;
     }
 
-    private void showCreatePage(PrintWriter writer, String fullName, String validationError) {
+    private void showCreatePage(PrintWriter writer, String firstName, String firstNameValidationError, String lastName, String lastNameValidationError) {
         writer.append("<html>");
-        writer.append("<head><style>#error { color: red; }</style></head>");
+        writer.append("<head><style>.error { color: red; }</style></head>");
 
-        if (validationError != null) {
-            writer.append("<div id='error'>").append(validationError).append("</div>");
+        if (firstNameValidationError != null) {
+            writer.append("<div class='error'>First name ").append(firstNameValidationError).append("</div>");
+        }
+        if (lastNameValidationError != null) {
+            writer.append("<div class='error'>Last name ").append(lastNameValidationError).append("</div>");
         }
         writer //
             .append("<form method='post' action='createPerson.html'>") //
-            .append("<input type='text' name='full_name' value='" + htmlEscape(fullName) + "'/>") //
+            .append("<label>First name:</label>")
+            .append("<input type='text' name='first_name' value='" + htmlEscape(firstName) + "'/>") //
+            .append("<label>Last name:</label>")
+            .append("<input type='text' name='last_name' value='" + htmlEscape(lastName) + "'/>") //
             .append("<input type='submit' name='createPerson' value='Create person'/>") //
             .append("</form>");
         writer.append("</html>");
     }
 
     private String htmlEscape(String fullName) {
+        if (fullName == null) return "";
         return fullName.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     }
 
