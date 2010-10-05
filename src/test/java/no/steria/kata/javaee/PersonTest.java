@@ -27,4 +27,13 @@ public class PersonTest {
         ;
     }
 
+    @Test
+    public void shouldBaseHashcodeOnName() throws Exception {
+        assertThat(Person.withName("Darth").hashCode()).as("hashCode") //
+            .isEqualTo(Person.withName("Darth").hashCode()) //
+            .isNotEqualTo(Person.withName("Anakin").hashCode()) //
+            .isNotEqualTo(Person.withName(null).hashCode())
+            ;
+    }
+
 }

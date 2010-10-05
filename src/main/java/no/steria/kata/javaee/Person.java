@@ -29,6 +29,11 @@ public class Person {
         return nullSafeEquals(name, ((Person)obj).name);
     }
 
+    @Override
+    public int hashCode() {
+        return getName() != null ? getName().hashCode() : -1;
+    }
+
     private boolean nullSafeEquals(String a, String b) {
         return a != null ? a.equals(b) : b == null;
     }
