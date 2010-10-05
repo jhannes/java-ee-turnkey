@@ -2,11 +2,14 @@ package no.steria.kata.javaee;
 
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.context.ThreadLocalSessionContext;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 
 public class HibernatePersonDao implements PersonDao {
 
@@ -37,7 +40,11 @@ public class HibernatePersonDao implements PersonDao {
     @SuppressWarnings("unchecked")
     @Override
     public List<Person> findPeople(String nameQuery) {
-        return getSession().createCriteria(Person.class).list();
+        Criteria criteria = getSession().createCriteria(Person.class);
+        if (nameQuery != null) {
+            criteria.add(Restrictions.ilike("name", nameQuery, MatchMode.ANYWHERE));
+        }
+        return criteria.list();
     }
 
     private Session getSession() {

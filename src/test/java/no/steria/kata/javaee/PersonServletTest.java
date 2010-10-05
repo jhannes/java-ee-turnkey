@@ -91,6 +91,18 @@ public class PersonServletTest {
         ;
     }
 
+    @Test
+    public void shouldEchoNameQuery() throws Exception {
+        getRequest("/findPeople.html");
+        when(req.getParameter("name_query")).thenReturn("vader");
+
+        servlet.service(req, resp);
+
+        assertThat(htmlSource.toString()) //
+            .contains("name='name_query' value='vader'") //
+            ;
+    }
+
     private void getRequest(String pathInfo) {
         when(req.getMethod()).thenReturn("GET");
         when(req.getPathInfo()).thenReturn(pathInfo);

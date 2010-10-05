@@ -26,8 +26,9 @@ public class PersonServlet extends HttpServlet {
         resp.setContentType("text/html");
         PrintWriter writer = resp.getWriter();
         if (req.getPathInfo().equals("/findPeople.html")) {
-            List<Person> people = personDao.findPeople(req.getParameter("name_query"));
-            showSearchPage(writer, people);
+            String nameQuery = req.getParameter("name_query");
+            List<Person> people = personDao.findPeople(nameQuery);
+            showSearchPage(writer, nameQuery, people);
         } else {
             showCreatePage(writer);
         }
@@ -41,11 +42,12 @@ public class PersonServlet extends HttpServlet {
             .append("</form>");
     }
 
-    private void showSearchPage(PrintWriter writer, List<Person> people) {
+    private void showSearchPage(PrintWriter writer, String nameQuery, List<Person> people) {
+        if (nameQuery == null) nameQuery = "";
         writer //
             .append("<html>") //
             .append("<form method='get' action='findPeople.html'>") //
-            .append("<input type='text' name='name_query' value=''/>") //
+            .append("<input type='text' name='name_query' value='" + nameQuery + "'/>") //
             .append("<input type='submit' name='findPeople' value='Find people'/>") //
             .append("</form>");
 
