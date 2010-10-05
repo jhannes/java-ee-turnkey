@@ -52,10 +52,7 @@ public class PersonServletTest {
 
     @Test
     public void shouldCreatePerson() throws Exception {
-        when(req.getMethod()).thenReturn("POST");
-        when(req.getParameter("first_name")).thenReturn("Darth");
-        when(req.getParameter("last_name")).thenReturn("Vader");
-        when(req.getParameter("birth_date")).thenReturn("");
+        postCreateFormWithParameters();
         servlet.service(req, resp);
 
         InOrder order = inOrder(personDao);
@@ -65,22 +62,8 @@ public class PersonServletTest {
     }
 
     @Test
-    public void shouldValidateFirstNameIsGiven() throws Exception {
-        when(req.getMethod()).thenReturn("POST");
-        when(req.getParameter("first_name")).thenReturn("");
-        when(req.getParameter("last_name")).thenReturn("Vader");
-
-        servlet.service(req, resp);
-        verify(personDao, never()).createPerson(any(Person.class));
-
-        assertThat(htmlSource.toString()).contains("<div class='error'>First name must be given</div>");
-    }
-
-    @Test
     public void shouldCreatePersonWithBirthDate() throws Exception {
-        when(req.getMethod()).thenReturn("POST");
-        when(req.getParameter("first_name")).thenReturn("Darth");
-        when(req.getParameter("last_name")).thenReturn("Vader");
+        postCreateFormWithParameters();
         when(req.getParameter("birth_date")).thenReturn("31.12.2001");
 
         servlet.service(req, resp);
@@ -92,9 +75,7 @@ public class PersonServletTest {
 
     @Test
     public void shouldValidateBirthDateFormat() throws Exception {
-        when(req.getMethod()).thenReturn("POST");
-        when(req.getParameter("first_name")).thenReturn("Darth");
-        when(req.getParameter("last_name")).thenReturn("Vader");
+        postCreateFormWithParameters();
         when(req.getParameter("birth_date")).thenReturn("xx.12.2001");
 
         servlet.service(req, resp);
@@ -106,9 +87,19 @@ public class PersonServletTest {
     }
 
     @Test
+    public void shouldValidateFirstNameIsGiven() throws Exception {
+        postCreateFormWithParameters();
+        when(req.getParameter("first_name")).thenReturn("");
+
+        servlet.service(req, resp);
+        verify(personDao, never()).createPerson(any(Person.class));
+
+        assertThat(htmlSource.toString()).contains("<div class='error'>First name must be given</div>");
+    }
+
+    @Test
     public void shouldValidateLastNameIsGiven() throws Exception {
-        when(req.getMethod()).thenReturn("POST");
-        when(req.getParameter("first_name")).thenReturn("Darth");
+        postCreateFormWithParameters();
         when(req.getParameter("last_name")).thenReturn("");
 
         servlet.service(req, resp);
@@ -122,7 +113,7 @@ public class PersonServletTest {
 
     @Test
     public void shouldValidateNameCannotContainHtmlCharacters() throws Exception {
-        when(req.getMethod()).thenReturn("POST");
+        postCreateFormWithParameters();
         when(req.getParameter("first_name")).thenReturn("<&");
         when(req.getParameter("last_name")).thenReturn(">");
 
@@ -208,6 +199,13 @@ public class PersonServletTest {
     private void getRequest(String pathInfo) {
         when(req.getMethod()).thenReturn("GET");
         when(req.getPathInfo()).thenReturn(pathInfo);
+    }
+
+    private void postCreateFormWithParameters() {
+        when(req.getMethod()).thenReturn("POST");
+        when(req.getParameter("first_name")).thenReturn("Darth");
+        when(req.getParameter("last_name")).thenReturn("Vader");
+        when(req.getParameter("birth_date")).thenReturn("");
     }
 
     @Before
