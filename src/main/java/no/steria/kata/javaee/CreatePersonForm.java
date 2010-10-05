@@ -3,78 +3,64 @@ package no.steria.kata.javaee;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
+import org.joda.time.DateMidnight;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class CreatePersonForm {
 
-    private String lastName = "";
-    private String firstName = "";
-    private String lastNameValidationError;
-    private String firstNameValidationError;
+    private HttpServletRequest req;
+    private Map<String, String> errors = new HashMap<String, String>();
 
     public CreatePersonForm(HttpServletRequest req) {
-        setFirstName(req.getParameter("first_name"));
-        setLastName(req.getParameter("last_name"));
+        this.req = req;
     }
 
     public CreatePersonForm() {
-        // TODO Auto-generated constructor stub
     }
 
-    static String htmlEscape(String fullName) {
-        if (fullName == null) return "";
-        return fullName.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    static String htmlEscape(String name) {
+        if (name == null) return "";
+        return name.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     }
 
     void show(PrintWriter writer) throws IOException {
         VelocityEngine engine = new VelocityEngine();
         Context context = new VelocityContext();
-        context.put("first_name", htmlEscape(firstName));
-        context.put("first_name_error", firstNameValidationError);
-        context.put("last_name", htmlEscape(lastName));
-        context.put("last_name_error", lastNameValidationError);
+        List<String> parameterNames = Arrays.asList("first_name", "last_name", "birth_date");
+        for (String parameterName : parameterNames) {
+            context.put(parameterName, htmlEscape(getParameter(parameterName)));
+        }
+
+        context.put("errors", errors);
+
         engine.evaluate(context, writer, "/person/create.html.vm", new InputStreamReader(getClass().getResourceAsStream("/person/create.html.vm")));
     }
 
-    public String getLastName() {
-        return lastName;
+    private String getParameter(String parameterName) {
+        if (req == null) return "";
+        if (req.getParameter(parameterName) == null) return "";
+        return req.getParameter(parameterName);
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-        setLastNameErrorMessage(validateName(lastName));
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-        setFirstNameErrorMessage(validateName(firstName));
-    }
-
-    public void setLastNameErrorMessage(String lastNameValidationError) {
-        this.lastNameValidationError = lastNameValidationError;
-    }
-
-    public void setFirstNameErrorMessage(String firstNameValidationError) {
-        this.firstNameValidationError = firstNameValidationError;
-    }
-
-    static String validateName(String fullName) {
-        String errorMessage = null;
-        if (fullName == null || fullName.equals("")) {
-            errorMessage = "must be given";
-        } else if (containsIllegalCharacters(fullName)) {
-            errorMessage = "contains illegal characters";
+    private String getRequiredStringParameter(String parameterName, String description) {
+        String value = getParameter(parameterName);
+        if (value == null || value.equals("")) {
+            errors.put(description, "must be given");
+        } else if (containsIllegalCharacters(value)) {
+            errors.put(description, "contains illegal characters");
         }
-        return errorMessage;
+        return value;
     }
 
     static boolean containsIllegalCharacters(String fullName) {
@@ -86,7 +72,26 @@ public class CreatePersonForm {
     }
 
     public boolean hasErrors() {
-        return lastNameValidationError != null || firstNameValidationError != null;
+        return !errors.isEmpty();
+    }
+
+    public Person createPerson() {
+        Person person = Person.withName(getRequiredStringParameter("first_name", "First name"), getRequiredStringParameter("last_name", "Last name"));
+        person.setBirthDate(getBirthDate());
+        return person;
+    }
+
+    private DateMidnight getBirthDate() {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("dd.MM.yyyy");
+        String birthDateAsString = req.getParameter("birth_date");
+        if (birthDateAsString != null && birthDateAsString.length() > 0) {
+            try {
+                return dateTimeFormatter.parseDateTime(birthDateAsString).toDateMidnight();
+            } catch (IllegalArgumentException e) {
+                errors.put("Birth date", "must be on the format 'dd.mm.yyyy'");
+            }
+        }
+        return null;
     }
 
 }

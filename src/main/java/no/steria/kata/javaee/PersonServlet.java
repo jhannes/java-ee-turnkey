@@ -43,11 +43,12 @@ public class PersonServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         CreatePersonForm form = new CreatePersonForm(req);
+        Person person = form.createPerson();
         if (form.hasErrors()) {
             resp.setContentType("text/html");
             form.show(resp.getWriter());
         } else {
-            personDao.createPerson(Person.withName(form.getFirstName(), form.getLastName()));
+            personDao.createPerson(person);
             resp.sendRedirect("/");
         }
     }
@@ -63,7 +64,7 @@ public class PersonServlet extends HttpServlet {
 
         writer.append("<ul>");
         for (Person person : people) {
-            writer.append("<li>").append(person.getName()).append("</li>");
+            writer.append("<li>").append(person.getDescription()).append("</li>");
         }
         writer //
             .append("</ul>") //

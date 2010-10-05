@@ -21,9 +21,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
+import org.joda.time.DateMidnight;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
 public class PersonServletTest {
@@ -43,6 +45,7 @@ public class PersonServletTest {
             .contains("<form method='post' action='createPerson.html'") //
             .contains("<input type='text' name='first_name' value=''") //
             .contains("<input type='text' name='last_name' value=''") //
+            .contains("<input type='text' name='birth_date' value=''") //
             .contains("<input type='submit' name='createPerson' value='Create person'") //
         ;
     }
@@ -52,6 +55,7 @@ public class PersonServletTest {
         when(req.getMethod()).thenReturn("POST");
         when(req.getParameter("first_name")).thenReturn("Darth");
         when(req.getParameter("last_name")).thenReturn("Vader");
+        when(req.getParameter("birth_date")).thenReturn("");
         servlet.service(req, resp);
 
         InOrder order = inOrder(personDao);
@@ -69,9 +73,35 @@ public class PersonServletTest {
         servlet.service(req, resp);
         verify(personDao, never()).createPerson(any(Person.class));
 
+        assertThat(htmlSource.toString()).contains("<div class='error'>First name must be given</div>");
+    }
+
+    @Test
+    public void shouldCreatePersonWithBirthDate() throws Exception {
+        when(req.getMethod()).thenReturn("POST");
+        when(req.getParameter("first_name")).thenReturn("Darth");
+        when(req.getParameter("last_name")).thenReturn("Vader");
+        when(req.getParameter("birth_date")).thenReturn("31.12.2001");
+
+        servlet.service(req, resp);
+        ArgumentCaptor<Person> argumentCaptor = ArgumentCaptor.forClass(Person.class);
+        verify(personDao).createPerson(argumentCaptor.capture());
+
+        assertThat(argumentCaptor.getValue().getBirthDate()).isEqualTo(new DateMidnight(2001, 12, 31));
+    }
+
+    @Test
+    public void shouldValidateBirthDateFormat() throws Exception {
+        when(req.getMethod()).thenReturn("POST");
+        when(req.getParameter("first_name")).thenReturn("Darth");
+        when(req.getParameter("last_name")).thenReturn("Vader");
+        when(req.getParameter("birth_date")).thenReturn("xx.12.2001");
+
+        servlet.service(req, resp);
+        verify(personDao, never()).createPerson(any(Person.class));
         assertThat(htmlSource.toString()) //
-            .contains("<form ") //
-            .contains("<div class='error'>First name must be given</div>")
+            .contains("<div class='error'>Birth date must be on the format 'dd.mm.yyyy'</div>") //
+            .contains("name='birth_date' value='xx.12.2001'") //
             ;
     }
 
@@ -149,15 +179,17 @@ public class PersonServletTest {
 
     @Test
     public void shouldDisplaySearchResult() throws Exception {
-        List<Person> people = Arrays.asList(Person.withName("Darth", "Vader"), Person.withName("Luke", "Skywalker"));
+        Person person = Person.withName("Darth", "Vader");
+        person.setBirthDate(new DateMidnight(2001, 12, 31));
+        List<Person> people = Arrays.asList(person, Person.withName("Luke", "Skywalker"));
         when(personDao.findPeople(anyString())).thenReturn(people);
         getRequest("/findPeople.html");
 
         servlet.service(req, resp);
 
         assertThat(htmlSource.toString()) //
-            .contains("Darth Vader") //
-            .contains("Luke Skywalker") //
+            .contains("<li>Darth Vader (born 31.12.2001)</li>") //
+            .contains("<li>Luke Skywalker</li>") //
         ;
     }
 

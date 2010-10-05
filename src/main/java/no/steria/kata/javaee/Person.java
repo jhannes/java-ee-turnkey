@@ -4,6 +4,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.joda.time.DateMidnight;
+
 @Entity
 public class Person {
 
@@ -15,6 +17,7 @@ public class Person {
 
     private String lastName;
 
+    private DateMidnight birthDate;
 
     public static Person withName(String firstName, String lastName) {
         Person person = new Person();
@@ -53,5 +56,18 @@ public class Person {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public DateMidnight getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(DateMidnight birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getDescription() {
+        if (birthDate != null) return getName() + " (born " + getBirthDate().toString("dd.MM.yyyy") + ")";
+        return getName();
     }
 }
