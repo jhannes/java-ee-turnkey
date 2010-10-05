@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <style>.error { color: red; }</style>
+  </head>
+
+  #if ( $first_name_error )
+    <div class='error'>First name ${first_name_error}</div>
+  #end
+  #if ( $last_name_error )
+    <div class='error'>Last name ${last_name_error}</div>
+  #end
+
+  <form method='post' action='createPerson.html'>
+    <label>First name:</label>
+    <input type='text' name='first_name' value='${first_name}' />
+    <label>Last name:</label>
+    <input type='text' name='last_name' value='${last_name}' />
+    <input type='submit' name='createPerson' value='Create person' />
+  </form>
+</html>

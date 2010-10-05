@@ -1,13 +1,19 @@
 package no.steria.kata.javaee;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.context.Context;
+
 public class CreatePersonForm {
 
-    private String lastName;
-    private String firstName;
+    private String lastName = "";
+    private String firstName = "";
     private String lastNameValidationError;
     private String firstNameValidationError;
 
@@ -25,25 +31,14 @@ public class CreatePersonForm {
         return fullName.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     }
 
-    void show(PrintWriter writer) {
-        writer.append("<html>");
-        writer.append("<head><style>.error { color: red; }</style></head>");
-
-        if (firstNameValidationError != null) {
-            writer.append("<div class='error'>First name ").append(firstNameValidationError).append("</div>");
-        }
-        if (lastNameValidationError != null) {
-            writer.append("<div class='error'>Last name ").append(lastNameValidationError).append("</div>");
-        }
-        writer //
-            .append("<form method='post' action='createPerson.html'>") //
-            .append("<label>First name:</label>")
-            .append("<input type='text' name='first_name' value='" + htmlEscape(firstName) + "'/>") //
-            .append("<label>Last name:</label>")
-            .append("<input type='text' name='last_name' value='" + htmlEscape(lastName) + "'/>") //
-            .append("<input type='submit' name='createPerson' value='Create person'/>") //
-            .append("</form>");
-        writer.append("</html>");
+    void show(PrintWriter writer) throws IOException {
+        VelocityEngine engine = new VelocityEngine();
+        Context context = new VelocityContext();
+        context.put("first_name", htmlEscape(firstName));
+        context.put("first_name_error", firstNameValidationError);
+        context.put("last_name", htmlEscape(lastName));
+        context.put("last_name_error", lastNameValidationError);
+        engine.evaluate(context, writer, "/person/create.html.vm", new InputStreamReader(getClass().getResourceAsStream("/person/create.html.vm")));
     }
 
     public String getLastName() {
