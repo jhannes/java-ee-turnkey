@@ -17,8 +17,13 @@ public class PersonServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         personDao.beginTransaction();
-        super.service(req, resp);
-        personDao.endTransaction(true);
+        boolean commit = false;
+        try {
+            super.service(req, resp);
+            commit = true;
+        } finally {
+            personDao.endTransaction(commit);
+        }
     }
 
     @Override
@@ -30,16 +35,51 @@ public class PersonServlet extends HttpServlet {
             List<Person> people = personDao.findPeople(nameQuery);
             showSearchPage(writer, nameQuery, people);
         } else {
-            showCreatePage(writer);
+            showCreatePage(writer, "", null);
         }
     }
 
-    private void showCreatePage(PrintWriter writer) {
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String fullName = req.getParameter("full_name");
+        String errorMessage = validateName(fullName);
+
+        if (errorMessage == null) {
+            personDao.createPerson(Person.withName(fullName));
+            resp.sendRedirect("/");
+        } else {
+            resp.setContentType("text/html");
+            showCreatePage(resp.getWriter(), fullName, errorMessage);
+        }
+    }
+
+    private String validateName(String fullName) {
+        String errorMessage = null;
+        if (fullName.equals("")) {
+            errorMessage = "Name must be given";
+        } else if (containsIllegalCharacters(fullName)) {
+            errorMessage = "Name contains illegal characters";
+        }
+        return errorMessage;
+    }
+
+    private void showCreatePage(PrintWriter writer, String fullName, String validationError) {
+        writer.append("<html>");
+        writer.append("<head><style>#error { color: red; }</style></head>");
+
+        if (validationError != null) {
+            writer.append("<div id='error'>").append(validationError).append("</div>");
+        }
         writer //
             .append("<form method='post' action='createPerson.html'>") //
-            .append("<input type='text' name='full_name' value=''/>") //
+            .append("<input type='text' name='full_name' value='" + htmlEscape(fullName) + "'/>") //
             .append("<input type='submit' name='createPerson' value='Create person'/>") //
             .append("</form>");
+        writer.append("</html>");
+    }
+
+    private String htmlEscape(String fullName) {
+        return fullName.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     }
 
     private void showSearchPage(PrintWriter writer, String nameQuery, List<Person> people) {
@@ -61,10 +101,12 @@ public class PersonServlet extends HttpServlet {
             ;
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        personDao.createPerson(Person.withName(req.getParameter("full_name")));
-        resp.sendRedirect("/");
+    private boolean containsIllegalCharacters(String fullName) {
+        String illegals = "<>&";
+        for (char illegal : illegals.toCharArray()) {
+            if (fullName.contains(Character.toString(illegal))) return true;
+        }
+        return false;
     }
 
     public void setPersonDao(PersonDao personDao) {

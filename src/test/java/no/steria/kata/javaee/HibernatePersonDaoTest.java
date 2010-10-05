@@ -34,6 +34,24 @@ public class HibernatePersonDaoTest {
             .excludes(nonMatchingPerson);
     }
 
+    @Test
+    public void shouldCommitOrRollback() throws Exception {
+        personDao.beginTransaction();
+        Person commitedPerson = Person.withName("Darth");
+        personDao.createPerson(commitedPerson);
+        personDao.endTransaction(true);
+
+        personDao.beginTransaction();
+        Person uncommitedPerson = Person.withName("Jar Jar Binks");
+        personDao.createPerson(uncommitedPerson);
+        personDao.endTransaction(false);
+
+        personDao.beginTransaction();
+        assertThat(personDao.findPeople(null)) //
+            .contains(commitedPerson) //
+            .excludes(uncommitedPerson);
+    }
+
     @Before
     public void setupPersonDao() throws NamingException {
         personDao = createPersonDao();

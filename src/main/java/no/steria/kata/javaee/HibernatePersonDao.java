@@ -35,6 +35,11 @@ public class HibernatePersonDao implements PersonDao {
 
     @Override
     public void endTransaction(boolean commit) {
+        if (commit) {
+            getSession().getTransaction().commit();
+        } else {
+            getSession().getTransaction().rollback();
+        }
     }
 
     @SuppressWarnings("unchecked")

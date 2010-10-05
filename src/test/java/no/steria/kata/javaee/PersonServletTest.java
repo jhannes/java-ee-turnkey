@@ -1,9 +1,12 @@
 package no.steria.kata.javaee;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,6 +57,53 @@ public class PersonServletTest {
         order.verify(personDao).createPerson(Person.withName("Darth"));
         order.verify(personDao).endTransaction(true);
     }
+
+    @Test
+    public void shouldValidateNameIsGiven() throws Exception {
+        when(req.getMethod()).thenReturn("POST");
+        when(req.getParameter("full_name")).thenReturn("");
+
+        servlet.service(req, resp);
+        verify(personDao, never()).createPerson(any(Person.class));
+
+        assertThat(htmlSource.toString()) //
+            .contains("<form ") //
+            .contains("<div id='error'>Name must be given</div>")
+            ;
+    }
+
+    @Test
+    public void shouldValidateNameCannotContainHtmlCharacters() throws Exception {
+        when(req.getMethod()).thenReturn("POST");
+        when(req.getParameter("full_name")).thenReturn("<&>");
+
+        servlet.service(req, resp);
+        verify(personDao, never()).createPerson(any(Person.class));
+
+        assertThat(htmlSource.toString()) //
+            .contains("<form ") //
+            .contains("name='full_name' value='&lt;&amp;&gt;'") //
+            .contains("<div id='error'>Name contains illegal characters</div>")
+            ;
+    }
+
+    @Test
+    public void shouldRollbackOnError() throws Exception {
+        when(req.getMethod()).thenReturn("POST");
+        when(req.getParameter("full_name")).thenReturn("Darth");
+        RuntimeException thrown = new RuntimeException();
+        doThrow(thrown)
+            .when(personDao).createPerson(any(Person.class));
+
+        try {
+            servlet.service(req, resp);
+        } catch (RuntimeException caught) {
+            assertThat(caught).isEqualTo(thrown);
+        }
+
+        verify(personDao).endTransaction(false);
+    }
+
 
     @Test
     public void shouldDisplayFindPage() throws Exception {
@@ -115,12 +165,10 @@ public class PersonServletTest {
     }
 
     @After
-    public void shouldBeValidHtml() throws DocumentException, IOException {
+    public void shouldBeValidHtml() throws DocumentException {
         if (htmlSource.toString().length() > 0) {
             verify(resp).setContentType("text/html");
             DocumentHelper.parseText(htmlSource.toString());
-        } else {
-            verify(resp).sendRedirect(anyString());
         }
     }
 }
