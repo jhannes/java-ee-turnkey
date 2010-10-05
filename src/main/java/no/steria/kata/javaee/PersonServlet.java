@@ -2,7 +2,6 @@ package no.steria.kata.javaee;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -31,11 +30,11 @@ public class PersonServlet extends HttpServlet {
         resp.setContentType("text/html");
         PrintWriter writer = resp.getWriter();
         if (req.getPathInfo().equals("/findPeople.html")) {
-            String nameQuery = req.getParameter("name_query");
-            List<Person> people = personDao.findPeople(nameQuery);
-            showSearchPage(writer, nameQuery, people);
+            FindPersonForm form = new FindPersonForm(req);
+            form.setPeople(personDao.findPeople(form.getNameQuery()));
+            form.show(writer);
         } else {
-            CreatePersonForm form = new CreatePersonForm();
+            CreatePersonForm form = new CreatePersonForm(req);
             form.show(writer);
         }
     }
@@ -51,25 +50,6 @@ public class PersonServlet extends HttpServlet {
             personDao.createPerson(person);
             resp.sendRedirect("/");
         }
-    }
-
-    private void showSearchPage(PrintWriter writer, String nameQuery, List<Person> people) {
-        if (nameQuery == null) nameQuery = "";
-        writer //
-            .append("<html>") //
-            .append("<form method='get' action='findPeople.html'>") //
-            .append("<input type='text' name='name_query' value='" + nameQuery + "'/>") //
-            .append("<input type='submit' name='findPeople' value='Find people'/>") //
-            .append("</form>");
-
-        writer.append("<ul>");
-        for (Person person : people) {
-            writer.append("<li>").append(person.getDescription()).append("</li>");
-        }
-        writer //
-            .append("</ul>") //
-            .append("</html>") //
-            ;
     }
 
     public void setPersonDao(PersonDao personDao) {

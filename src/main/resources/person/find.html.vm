@@ -1,0 +1,12 @@
+
+<html>
+  <form method='get' action='findPeople.html'>
+    <input type='text' name='name_query' value='${name_query}' />
+    <input type='submit' name='findPeople' value='Find people' />
+  </form>
+  <ul>
+  #foreach ( $person in $people )
+    <li>${person.description}</li>
+  #end
+  </ul>
+</html>
