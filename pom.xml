@@ -10,45 +10,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.velocity</groupId>
-      <artifactId>velocity</artifactId>
-      <version>1.6.4</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-      <version>1.6.2</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>javassist</groupId>
-      <artifactId>javassist</artifactId>
-      <version>3.4.GA</version>
-    </dependency>
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-annotations</artifactId>
-      <version>3.4.0.GA</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.4.2</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.5</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
       <version>1.8.0.10</version>
@@ -63,16 +24,58 @@
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
       <version>7.2.2.v20101205</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-plus</artifactId>
       <version>7.2.2.v20101205</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>c3p0</groupId>
       <artifactId>c3p0</artifactId>
       <version>0.9.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.4.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.velocity</groupId>
+      <artifactId>velocity</artifactId>
+      <version>1.6.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>1.6.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>3.4.GA</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-annotations</artifactId>
+      <version>3.4.0.GA</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.5</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.seleniumhq.webdriver</groupId>
@@ -115,7 +118,129 @@
           <source>1.6</source>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>executable-webapp-classes</id>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <artifactItems>
+            <artifactItem>
+              <groupId>hsqldb</groupId>
+              <artifactId>hsqldb</artifactId>
+              <version>1.8.0.10</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>com.google.guava</groupId>
+              <artifactId>guava</artifactId>
+              <version>r07</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-server</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-webapp</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-servlet</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-security</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-xml</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-continuation</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-http</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-io</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-jndi</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-util</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-plus</artifactId>
+              <version>7.2.2.v20101205</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>javax.servlet</groupId>
+              <artifactId>servlet-api</artifactId>
+              <version>2.5</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>c3p0</groupId>
+              <artifactId>c3p0</artifactId>
+              <version>0.9.1</version>
+            </artifactItem>
+            <artifactItem>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-log4j12</artifactId>
+              <version>1.4.2</version>
+            </artifactItem>
+          </artifactItems>
+          <outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <copy todir="${project.build.directory}/${project.build.finalName}">
+                  <fileset dir="${project.build.outputDirectory}" includes="**/*.class" />
+                </copy>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Main-Class>no.steria.kata.javaee.main.WebServer</Main-Class>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
-
 </project>
