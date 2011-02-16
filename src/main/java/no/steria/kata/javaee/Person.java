@@ -10,7 +10,8 @@ import org.joda.time.DateMidnight;
 public class Person {
 
     @SuppressWarnings("unused")
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     private Long id;
 
     private String firstName;
@@ -69,5 +70,10 @@ public class Person {
     public String getDescription() {
         if (birthDate != null) return getName() + " (born " + getBirthDate().toString("dd.MM.yyyy") + ")";
         return getName();
+    }
+
+    public int getAge() {
+        // TODO Auto-generated method stub
+        throw new RuntimeException("Not implemented yet");
     }
 }
