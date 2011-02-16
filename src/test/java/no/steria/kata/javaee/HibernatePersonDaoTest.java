@@ -4,11 +4,11 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import javax.naming.NamingException;
 
+import org.eclipse.jetty.plus.jndi.EnvEntry;
 import org.hibernate.cfg.Environment;
 import org.hsqldb.jdbc.jdbcDataSource;
 import org.junit.Before;
 import org.junit.Test;
-import org.mortbay.jetty.plus.naming.EnvEntry;
 
 public class HibernatePersonDaoTest {
 
@@ -27,7 +27,8 @@ public class HibernatePersonDaoTest {
         personDao.beginTransaction();
         Person matchingPerson = Person.withName("Darth", "Vader");
         Person nonMatchingPerson = Person.withName("Anakin", "Skywalker");
-        personDao.createPerson(matchingPerson); personDao.createPerson(nonMatchingPerson);
+        personDao.createPerson(matchingPerson);
+        personDao.createPerson(nonMatchingPerson);
 
         assertThat(personDao.findPeople("vader")) //
             .contains(matchingPerson) //
