@@ -5,11 +5,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.naming.NamingException;
 
+import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.jetty.plus.jndi.EnvEntry;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -22,19 +25,37 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 public class WebServer {
 
     public static void main(String[] args) throws Exception {
+        extractFile(new File("log4j.properties"));
+        PropertyConfigurator.configureAndWatch("log4j.properties");
+
         File propertiesFile = new File("personweb.properties");
         extractFile(propertiesFile);
         mergePropertiesFromFile(propertiesFile);
         registerDataSource("jdbc/personDs", "personweb.datasource");
         System.setProperty(Environment.HBM2DDL_AUTO, "update");
 
-        int serverPort = Integer.parseInt(System.getProperty("personweb.http.port", "8088"));
-        Server server = new Server(serverPort);
-        server.setHandler(new WebAppContext("src/main/webapp", "/"));
+        Server server = new Server(getHttpPort());
+        server.setHandler(createWebAppContext());
         server.start();
 
-        String baseUrl = "http://localhost:" + serverPort + "/";
+        String baseUrl = "http://localhost:" + getHttpPort() + "/";
         System.out.println(baseUrl);
+    }
+
+    private static int getHttpPort() {
+        return Integer.parseInt(System.getProperty("personweb.http.port", "8088"));
+    }
+
+    private static WebAppContext createWebAppContext() {
+        return new WebAppContext(getSelfWebContext(), "/");
+    }
+
+    private static String getSelfWebContext() {
+        URL[] urls = ((URLClassLoader)WebServer.class.getClassLoader()).getURLs();
+        if (urls.length == 1 && urls[0].getFile().endsWith(".war")) {
+            return urls[0].getFile();
+        }
+        return "src/main/webapp";
     }
 
     private static void extractFile(File propertiesFile) throws IOException {

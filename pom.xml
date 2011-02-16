@@ -123,6 +123,7 @@
         <executions>
           <execution>
             <id>executable-webapp-classes</id>
+            <phase>prepare-package</phase>
             <goals>
               <goal>unpack</goal>
             </goals>
@@ -221,10 +222,14 @@
             <goals>
               <goal>run</goal>
             </goals>
+            <phase>prepare-package</phase>
             <configuration>
               <tasks>
                 <copy todir="${project.build.directory}/${project.build.finalName}">
-                  <fileset dir="${project.build.outputDirectory}" includes="**/*.class" />
+                  <fileset dir="${project.build.outputDirectory}">
+                    <include name="**/*.class" />
+                    <include name="**/*.properties" />
+                  </fileset>
                 </copy>
               </tasks>
             </configuration>
