@@ -1,4 +1,4 @@
-package no.steria.kata.javaee;
+package no.steria.kata.javaee.main;
 
 import java.beans.PropertyVetoException;
 import java.io.File;
