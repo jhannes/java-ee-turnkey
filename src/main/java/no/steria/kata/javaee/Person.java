@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import org.joda.time.DateMidnight;
+import org.joda.time.Period;
 
 @Entity
 public class Person {
@@ -73,6 +74,6 @@ public class Person {
     }
 
     public int getAge() {
-        return -1;
+        return new Period(birthDate, new DateMidnight()).getYears();
     }
 }
