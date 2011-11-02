@@ -5,3 +5,6 @@
 /.project
 /velocity.log
 /personweb.properties
+/tmp
+
+/log4j-personweb.properties

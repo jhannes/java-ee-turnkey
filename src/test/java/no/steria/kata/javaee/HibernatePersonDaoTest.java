@@ -73,5 +73,6 @@ public class HibernatePersonDaoTest {
 
         return new HibernatePersonDao(jndiDataSource);
     }
+    
 
 }

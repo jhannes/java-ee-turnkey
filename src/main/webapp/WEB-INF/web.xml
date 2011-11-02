@@ -8,8 +8,18 @@
     <servlet-class>no.steria.kata.javaee.PersonServlet</servlet-class>
   </servlet>
 
+  <servlet>
+    <servlet-name>securedServlet</servlet-name>
+    <servlet-class>no.steria.kata.javaee.secure.SecuredServlet</servlet-class>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>personServlet</servlet-name>
     <url-pattern>person/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>personServlet</servlet-name>
+    <url-pattern>secured/*</url-pattern>
   </servlet-mapping>
 </web-app>
