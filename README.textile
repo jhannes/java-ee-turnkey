@@ -1,9 +1,0 @@
-A demonstration of a Java application deployed as an executable war
-with all dependencies included.
-
-TODO:
-* Database migrations (from servlet listener)
-* Proper packaging (currently, the WAR file seems to have problems with its class path)
-* Shutdown 
-* Startup control
-

@@ -1,16 +1,11 @@
-package no.steria.kata.javaee;
+package no.steria.turnkey.person;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import javax.naming.NamingException;
-
-import org.eclipse.jetty.plus.jndi.EnvEntry;
-import org.hibernate.cfg.Environment;
-import org.hsqldb.jdbc.jdbcDataSource;
 import org.junit.Before;
 import org.junit.Test;
 
-public class HibernatePersonDaoTest {
+public abstract class AbstractPersonDaoTest {
 
     private PersonDao personDao;
 
@@ -31,11 +26,11 @@ public class HibernatePersonDaoTest {
         personDao.createPerson(nonMatchingPerson);
 
         assertThat(personDao.findPeople("vader")) //
-            .contains(matchingPerson) //
-            .excludes(nonMatchingPerson);
+        .contains(matchingPerson) //
+        .excludes(nonMatchingPerson);
         assertThat(personDao.findPeople("darth")) //
-            .contains(matchingPerson) //
-            .excludes(nonMatchingPerson);
+        .contains(matchingPerson) //
+        .excludes(nonMatchingPerson);
     }
 
     @Test
@@ -51,28 +46,17 @@ public class HibernatePersonDaoTest {
         personDao.endTransaction(false);
 
         personDao.beginTransaction();
-        assertThat(personDao.findPeople(null)) //
-            .contains(commitedPerson) //
-            .excludes(uncommitedPerson);
+        assertThat(personDao.findPeople(null))
+        .contains(commitedPerson)
+        .excludes(uncommitedPerson);
     }
 
     @Before
-    public void setupPersonDao() throws NamingException {
+    public void setupPersonDao() throws Exception {
         personDao = createPersonDao();
     }
 
-    private PersonDao createPersonDao() throws NamingException {
-        String jndiDataSource = "jdbc/testDs";
+    protected abstract PersonDao createPersonDao() throws Exception;
 
-        jdbcDataSource dataSource = new jdbcDataSource();
-        dataSource.setDatabase("jdbc:hsqldb:mem:test");
-        dataSource.setUser("sa");
-        new EnvEntry(jndiDataSource, dataSource);
-
-        System.setProperty(Environment.HBM2DDL_AUTO, "create");
-
-        return new HibernatePersonDao(jndiDataSource);
-    }
-    
 
 }

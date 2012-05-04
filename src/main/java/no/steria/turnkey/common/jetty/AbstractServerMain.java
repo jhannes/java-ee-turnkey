@@ -1,6 +1,5 @@
-package no.steria.kata.javaee.main;
+package no.steria.turnkey.common.jetty;
 
-import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,59 +18,44 @@ import java.util.Properties;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import no.steria.turnkey.common.ConnectionPool;
+
 import org.eclipse.jetty.plus.jndi.EnvEntry;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.RequestLog;
-import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.server.handler.ShutdownHandler;
-import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 
 public abstract class AbstractServerMain {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     private List<String> monitoredDataSources = new ArrayList<String>();
-    
-    public static class LatestVisitorLog extends AbstractLifeCycle implements RequestLog {
-
-        private DateTime latestRequest = new DateTime();
-
-        public void log(Request request, Response response) {
-            if (request.getPathInfo().startsWith("/favicon.ico")) return;
-            if (request.getPathInfo().matches("^/[^/]*status")) return;
-            this.latestRequest = new DateTime();
-        }
-        
-        public DateTime getLatestRequest() {
-            return latestRequest;
-        }
-    };
-    private LatestVisitorLog latestVisitorLog = new LatestVisitorLog();
-    
-    public LatestVisitorLog getLatestVisitorLog() {
-        return latestVisitorLog;
-    }
 
     protected EnvEntry createAndRegisterDatasource(String dsName, String jndiName) throws NamingException, SQLException {
         this.monitoredDataSources.add(jndiName);
         return new EnvEntry(jndiName, createDataSource(dsName));
     }
-    
+
     public List<String> getMonitoredDataSources() {
         return monitoredDataSources;
     }
 
-    
+    protected void configureLogging(String logConfig) throws IOException, JoranException {
+        extractConfiguration(logConfig);
+        JoranConfigurator configurator = new JoranConfigurator();
+        configurator.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
+        configurator.doConfigure(logConfig);
+    }
+
     protected void startJetty(int port, HandlerCollection webContexts) throws Exception {
         attemptShutdown(port);
 
@@ -160,32 +144,7 @@ public abstract class AbstractServerMain {
     }
 
     protected DataSource createDataSource(String dsName) throws SQLException {
-        ComboPooledDataSource dataSource = new ComboPooledDataSource();
-        String url = System.getProperty(dsName + ".datasource.url", "jdbc:hsqldb:file:target/test-db");
-        String username = System.getProperty(dsName + ".datasource.username", "sa");
-        try {
-			dataSource.setDriverClass(System.getProperty(dsName + ".datasource.driverClassName", "org.hsqldb.jdbcDriver"));
-		} catch (PropertyVetoException e) {
-			throw new RuntimeException("C3p0IsStupidException", e);
-		}
-		dataSource.setJdbcUrl(url);
-		dataSource.setUser(username);
-        dataSource.setPassword(System.getProperty(dsName + ".datasource.password", ""));
-        dataSource.setAcquireRetryAttempts(0);
-
-
-        try {
-        	dataSource.getConnection().close();
-            logger.info("Connection to " + dsName + " (url=" + url + ", username=" + username + ") is successfull");
-        } catch (SQLException e) {
-            logger.error("Could not connect to database " + dsName + ": url=" + url + ", username=" + username, e);
-            System.exit(1); // <--- Remove this line if we want the server to
-                            // start while the database is down. This eliminates
-                            // having to restart the server once the database is
-                            // up again
-        }
-
-        return dataSource;
+        return ConnectionPool.fromSystemProperties(dsName);
     }
 
     public AbstractServerMain() {
@@ -205,7 +164,6 @@ public abstract class AbstractServerMain {
         context.setHandler(securityHandler);
         RequestLogHandler requestLogHandler = new RequestLogHandler();
         requestLogHandler.setHandler(context);
-        requestLogHandler.setRequestLog(latestVisitorLog);
         return requestLogHandler;
     }
 

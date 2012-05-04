@@ -1,10 +1,12 @@
-package no.steria.kata.javaee.main;
+package no.steria.turnkey.main;
 
 import java.sql.SQLException;
 
 import javax.naming.NamingException;
 
-import org.apache.log4j.PropertyConfigurator;
+import no.steria.turnkey.common.jetty.AbstractServerMain;
+import no.steria.turnkey.common.jetty.StatusHandler;
+
 import org.eclipse.jetty.http.security.Constraint;
 import org.eclipse.jetty.http.security.Password;
 import org.eclipse.jetty.security.ConstraintMapping;
@@ -13,7 +15,6 @@ import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.hibernate.cfg.Environment;
 
 public class TurnkeyMain extends AbstractServerMain {
 
@@ -22,11 +23,9 @@ public class TurnkeyMain extends AbstractServerMain {
     }
 
     protected void start() throws NamingException, SQLException, Exception {
-        extractConfiguration("personweb.properties");
-        extractConfiguration("log4j-personweb.properties");
-        mergeIntoSystemProperties("personweb.properties");
-        PropertyConfigurator.configureAndWatch("log4j-personweb.properties", 10000);
-        System.setProperty(Environment.HBM2DDL_AUTO, "update");
+        extractConfiguration("turnkey.properties");
+        configureLogging("logback-turnkey.xml");
+        mergeIntoSystemProperties("turnkey.properties");
 
         createAndRegisterDatasource("personweb", "jdbc/personDs");
 
@@ -40,9 +39,9 @@ public class TurnkeyMain extends AbstractServerMain {
     protected HandlerCollection createWebContexts() throws Exception {
         HandlerCollection handlerCollection = new HandlerCollection();
         handlerCollection.setHandlers(new Handler[] {
-                new StatusHandler("/personweb-status", "PersonWeb", getMonitoredDataSources(), getLatestVisitorLog()),
-                createCurrentWebApp("/person", securityHandler()),
-                //new MovedContextHandler(handlerCollection, "/", "/person")
+            new StatusHandler("/personweb-status", "PersonWeb", getMonitoredDataSources()),
+            createCurrentWebApp("/person", securityHandler()),
+            //new MovedContextHandler(handlerCollection, "/", "/person")
         });
         return handlerCollection;
     }
@@ -50,14 +49,14 @@ public class TurnkeyMain extends AbstractServerMain {
     protected ConstraintSecurityHandler securityHandler() throws Exception {
         Constraint constraint = new Constraint(Constraint.__BASIC_AUTH, "PERSONWEB");
         constraint.setAuthenticate(true);
-        
+
         ConstraintMapping mapping = new ConstraintMapping();
         mapping.setPathSpec("/secure/*");
         mapping.setConstraint(constraint);
-        
+
         ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
-//        securityHandler.addConstraintMapping(mapping);
-        
+        //        securityHandler.addConstraintMapping(mapping);
+
         HashLoginService service = new HashLoginService();
         service.putUser("user1", new Password("password"), new String[] { "PERSONWEB" });
         service.putUser("user2", new Password("password"), new String[] { "PERSONWEB" });

@@ -1,4 +1,4 @@
-package no.steria.kata.javaee;
+package no.steria.turnkey.common.web;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

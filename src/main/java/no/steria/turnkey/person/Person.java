@@ -1,18 +1,11 @@
-package no.steria.kata.javaee;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+package no.steria.turnkey.person;
 
 import org.joda.time.DateMidnight;
 import org.joda.time.Period;
 
-@Entity
 public class Person {
 
     @SuppressWarnings("unused")
-    @Id
-    @GeneratedValue
     private Long id;
 
     private String firstName;

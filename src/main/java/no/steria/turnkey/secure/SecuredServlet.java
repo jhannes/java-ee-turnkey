@@ -1,4 +1,4 @@
-package no.steria.kata.javaee.secure;
+package no.steria.turnkey.secure;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package no.steria.kata.javaee;
+package no.steria.turnkey.person;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -58,6 +58,6 @@ public class PersonServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        setPersonDao(new HibernatePersonDao("jdbc/personDs"));
+        setPersonDao(new HashMapPersonDao("jdbc/personDs"));
     }
 }

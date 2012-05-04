@@ -5,12 +5,12 @@
   
   <servlet>
     <servlet-name>personServlet</servlet-name>
-    <servlet-class>no.steria.kata.javaee.PersonServlet</servlet-class>
+    <servlet-class>no.steria.turnkey.person.PersonServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>securedServlet</servlet-name>
-    <servlet-class>no.steria.kata.javaee.secure.SecuredServlet</servlet-class>
+    <servlet-class>no.steria.turnkey.secure.SecuredServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>

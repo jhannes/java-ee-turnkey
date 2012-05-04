@@ -1,4 +1,4 @@
-package no.steria.kata.javaee;
+package no.steria.turnkey.person;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+
+import no.steria.turnkey.common.web.VelocityForm;
 
 public class FindPersonForm extends VelocityForm {
 

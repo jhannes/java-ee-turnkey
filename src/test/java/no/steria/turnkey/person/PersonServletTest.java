@@ -1,4 +1,4 @@
-package no.steria.kata.javaee;
+package no.steria.turnkey.person;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -18,6 +18,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;

@@ -1,4 +1,4 @@
-package no.steria.kata.javaee.main;
+package no.steria.turnkey.common.jetty;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import javax.naming.InitialContext;
@@ -17,24 +18,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import no.steria.kata.javaee.main.AbstractServerMain.LatestVisitorLog;
-
 import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.joda.time.Period;
 
 public class StatusHandler extends AbstractHandler {
 
     private final List<String> monitoredDataSources;
     private String applicationName;
-    private final LatestVisitorLog latestVisitorLog;
+    private long latestRequestTime = System.currentTimeMillis();
     private String contextPath;
 
     enum Severity {
-        FATAL("red"), 
+        FATAL("red"),
         WARNING("orange"),
         SUSPECT("yellow"),
         OK("green");
@@ -43,7 +39,7 @@ public class StatusHandler extends AbstractHandler {
             this.color = color;
         }
     }
-    
+
     private static class StatusInfo {
         Severity severity;
         String category;
@@ -58,24 +54,24 @@ public class StatusHandler extends AbstractHandler {
             return category + "=" + severity.name() + " (" + message + ")";
         }
     }
-    
-    
-    public StatusHandler(String contextPath, String applicationName, List<String> monitoredDataSources, LatestVisitorLog latestVisitorLog) {
+
+
+    public StatusHandler(String contextPath, String applicationName, List<String> monitoredDataSources) {
         this.applicationName = applicationName;
         this.monitoredDataSources = monitoredDataSources;
-        this.latestVisitorLog = latestVisitorLog;
         this.contextPath = contextPath;
     }
 
+    @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         if (!target.equals(contextPath)) {
             return;
         }
-        
+
         baseRequest.setHandled(true);
-        
+
         response.setContentType("text/html");
-        
+
         List<StatusInfo> statusInfoList = aggregateStatusInfo();
         Severity severity = getHighestSeverity(statusInfoList);
         response.getWriter().println("<html>");
@@ -92,7 +88,7 @@ public class StatusHandler extends AbstractHandler {
         response.getWriter().println("</body>");
         response.getWriter().println("</html>");
         response.getWriter().flush();
-        
+
         response.setStatus(HttpServletResponse.SC_OK);
         HttpConnection.getCurrentConnection().getRequest().setHandled(true);
     }
@@ -100,6 +96,7 @@ public class StatusHandler extends AbstractHandler {
     private Severity getHighestSeverity(List<StatusInfo> statusInfoList) {
         List<StatusInfo> copy = new ArrayList<StatusHandler.StatusInfo>(statusInfoList);
         Collections.sort(copy, new Comparator<StatusInfo>() {
+            @Override
             public int compare(StatusInfo o1, StatusInfo o2) {
                 return o1.severity.compareTo(o2.severity);
             }
@@ -125,10 +122,10 @@ public class StatusHandler extends AbstractHandler {
     }
 
     private StatusInfo statusLatestUserRequest() {
-        Period warningPeriod = Period.seconds(10);
-        String lastVisitMessage = "Last visit " + latestVisitorLog.getLatestRequest();
-        if (latestVisitorLog.getLatestRequest().isBefore(new DateTime().minus(warningPeriod))) {
-            return new StatusInfo("lastest visitor", "More than " + warningPeriod + " since last visitor. " + lastVisitMessage, Severity.SUSPECT);
+        long warningPeriodInSeconds = 30;
+        String lastVisitMessage = "Last visit " + new Date(latestRequestTime);
+        if (latestRequestTime + warningPeriodInSeconds*1000 < System.currentTimeMillis()) {
+            return new StatusInfo("lastest visitor", "More than " + warningPeriodInSeconds + " seconds since last visitor. " + lastVisitMessage, Severity.SUSPECT);
         }
         return new StatusInfo("lastest visitor", lastVisitMessage, Severity.OK);
     }
@@ -147,8 +144,8 @@ public class StatusHandler extends AbstractHandler {
 
     private StatusInfo statusUptime() {
         RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-        DateTime startTime = new DateTime(runtimeMXBean.getStartTime());
-        return new StatusInfo("uptime", new Interval(startTime, new DateTime()).toDuration(), Severity.OK);
+        long uptime = System.currentTimeMillis() - runtimeMXBean.getStartTime();
+        return new StatusInfo("uptime (seconds)", uptime/1000.0, Severity.OK);
     }
 
 }

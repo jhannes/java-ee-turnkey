@@ -1,6 +1,7 @@
-package no.steria.kata.javaee;
+package no.steria.turnkey.person;
 
 import static org.fest.assertions.Assertions.assertThat;
+
 
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTimeUtils;

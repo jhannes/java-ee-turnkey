@@ -1,12 +1,11 @@
-package no.steria.kata.javaee;
+package no.steria.turnkey.person;
 
 import static org.fest.assertions.Assertions.assertThat;
+import no.steria.turnkey.common.ConnectionPool;
 
 import org.eclipse.jetty.plus.jndi.EnvEntry;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.hibernate.cfg.Environment;
-import org.hsqldb.jdbc.jdbcDataSource;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -18,14 +17,7 @@ public class PersonWebTest {
 
     @Test
     public void shouldFindSavedPerson() throws Exception {
-        String jndiDataSource = "jdbc/personDs";
-
-        jdbcDataSource dataSource = new jdbcDataSource();
-        dataSource.setDatabase("jdbc:hsqldb:mem:webtest");
-        dataSource.setUser("sa");
-        new EnvEntry(jndiDataSource, dataSource);
-
-        System.setProperty(Environment.HBM2DDL_AUTO, "create");
+        new EnvEntry("jdbc/personDs", ConnectionPool.fromSystemProperties("personDs"));
 
         Server server = new Server(0);
         server.setHandler(new WebAppContext("src/main/webapp", "/"));

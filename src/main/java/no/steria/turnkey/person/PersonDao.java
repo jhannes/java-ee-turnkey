@@ -1,4 +1,4 @@
-package no.steria.kata.javaee;
+package no.steria.turnkey.person;
 
 import java.util.List;
 
