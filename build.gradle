@@ -1,5 +1,6 @@
 apply plugin: 'war'
 apply plugin: 'eclipse-wtp'
+apply plugin: 'idea'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -7,6 +8,7 @@ version = '1.0-SNAPSHOT'
 
 def jettyVersion = '7.5.4.v20111024'
 def defaultEncoding = "UTF-8"
+def mainClass = "no.steria.turnkey.main.TurnkeyMain"
 System.setProperty("file.encoding", defaultEncoding)
 
 compileJava {
@@ -19,12 +21,9 @@ compileTestJava {
 
 repositories {
     mavenLocal()
-    mavenRepo url: 'http://slfbygger:8081/nexus/content/groups/public'
+    mavenCentral()
 }
 
-configurations {
-  jetty
-}
 
 dependencies {
     compile 'dom4j:dom4j:1.6.1'
@@ -37,7 +36,7 @@ dependencies {
     providedCompile 'org.slf4j:slf4j-api:1.6.4'
     providedCompile 'ch.qos.logback:logback-classic:1.0.1'
     providedCompile 'com.h2database:h2:1.3.166'
-    providedCompile 'oracle.jars:ojdbc:1.4' 
+    //providedCompile 'oracle.jars:ojdbc:1.4' 
     providedCompile 'javax.servlet:servlet-api:2.5'
     providedCompile 'c3p0:c3p0:0.9.1.2'
     providedCompile("org.eclipse.jetty.aggregate:jetty-plus:$jettyVersion")
@@ -56,22 +55,27 @@ dependencies {
 [compileJava, compileTestJava]*.options*.encoding = defaultEncoding
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.0-rc-1'
+    gradleVersion = '1.10'
 }
 
 war {
-    from { 
-      configurations.providedCompile.collect { zipTree(it) }
-    }
-    from {
-      configurations.jetty.collect { zipTree(it) }
-    } 
-    from 'build/classes/main'
-    from 'build/resources/main'
+    doFirst{
+        from { 
+          configurations.providedCompile.collect { zipTree(it) }
+        }        
+        from 'build/classes/main'
+        from 'build/resources/main'
 
-    manifest {
-		attributes("version": "$version") 
-	    attributes("Main-Class": "no.steria.turnkey.main.TurnkeyMain")
-	}
+        manifest {
+    		attributes("version": "$version") 
+    	    attributes("Main-Class": mainClass)
+    	}
+    }
+}
+
+task run(type: JavaExec, dependsOn:[classes]) {
+    main = mainClass
+    systemProperty 'personweb.http.port', '8888'
+    classpath = sourceSets.main.runtimeClasspath
 }
 

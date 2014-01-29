@@ -27,12 +27,13 @@ From git to local running application:
 --------------------------------------
 Prerequisites: Java 7
 
-1. Download the project: <code>git clone git@github.com:steria/java-ee-turnkey</code>
-2. Build the project: <code>gradlew jetty</code> (alternatively: <code>gradlew idea</code>)
-3. Set up local environment
-  * Configure web server port: <code>set PORT=5001</code> (UNIX: <code>export PORT=5001</code>)
-4. Start server: <code>java -jar target/*.war</code>
-5. Verify by going to http://localhost:5001
+Either: <code>gradlew build && java -jar build/libs/*.war</code><br>
+Verify by going to http://localhost:10080/person
+
+or
+
+<code>gradlew run</code><br>
+Verify by going to http://localhost:8888/person
 
 From git to heroku:
 -------------------
