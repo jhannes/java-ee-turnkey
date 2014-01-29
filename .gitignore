@@ -12,3 +12,7 @@
 /logback-turnkey.xml
 /turnkey.properties
 /build
+/logs
+*.iml
+*.ipr
+*.iws
