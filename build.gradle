@@ -8,6 +8,7 @@ version = '1.0-SNAPSHOT'
 
 def jettyVersion = '7.5.4.v20111024'
 def defaultEncoding = "UTF-8"
+def mainClass = "no.steria.turnkey.main.TurnkeyMain"
 System.setProperty("file.encoding", defaultEncoding)
 
 compileJava {
@@ -67,8 +68,14 @@ war {
 
         manifest {
     		attributes("version": "$version") 
-    	    attributes("Main-Class": "no.steria.turnkey.main.TurnkeyMain")
+    	    attributes("Main-Class": mainClass)
     	}
     }
+}
+
+task run(type: JavaExec, dependsOn:[classes]) {
+    main = mainClass
+    systemProperty 'personweb.http.port', '8888'
+    classpath = sourceSets.main.runtimeClasspath
 }
 
